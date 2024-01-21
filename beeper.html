@@ -39,124 +39,149 @@
 </head>
 
 <body>
-    <div id="app">
-        <div class="input-group">
-            <label for="min-interval">Min Interval (seconds): </label>
-            <input type="number" id="min-interval" min="1" value="1">
-            <label for="max-interval">Max Interval (seconds): </label>
-            <input type="number" id="max-interval" min="1" value="5">
-        </div>
-        <div class="color-inputs">
-            <input type="text" id="color1" placeholder="Color 1" value="red">
-            <input type="number" id="weight1" min="0" placeholder="Weight 1" value="1">
-            <input type="text" id="description1" placeholder="Description 1" value="punch">
-            <br>
-            <input type="text" id="color2" placeholder="Color 2" value="green">
-            <input type="number" id="weight2" min="0" placeholder="Weight 2" value="1">
-            <input type="text" id="description2" placeholder="Description 2" value="nature">
-            <br>
-            <input type="text" id="color3" placeholder="Color 3" value="blue">
-            <input type="number" id="weight3" min="0" placeholder="Weight 3" value="1">
-            <input type="text" id="description3" placeholder="Description 3" value="calm">
-        </div>
-        <button id="startButton">Start</button>
-        <button id="stopButton">Stop</button>
-        <div id="elapsedTime">Elapsed Time: 0s</div>
-
+<div id="app">
+    <div class="input-group">
+        <label for="min-interval">Min Interval (seconds): </label>
+        <input type="number" id="min-interval" min="1" value="1">
+        <label for="max-interval">Max Interval (seconds): </label>
+        <input type="number" id="max-interval" min="1" value="5">
     </div>
+    <div class="color-inputs">
+        <input type="text" id="color1" placeholder="Color 1" value="red">
+        <input type="number" id="weight1" min="0" placeholder="Weight 1" value="1">
+        <input type="text" id="description1" placeholder="Description 1" value="punch">
+        <br>
+        <input type="text" id="color2" placeholder="Color 2" value="green">
+        <input type="number" id="weight2" min="0" placeholder="Weight 2" value="1">
+        <input type="text" id="description2" placeholder="Description 2" value="nature">
+        <br>
+        <input type="text" id="color3" placeholder="Color 3" value="blue">
+        <input type="number" id="weight3" min="0" placeholder="Weight 3" value="1">
+        <input type="text" id="description3" placeholder="Description 3" value="calm">
+    </div>
+    <button id="startButton">Start</button>
+    <button id="stopButton">Stop</button>
+    <div id="roundTime">Round Time: 0s</div>
+    <br>
+    <div id="workoutTime">Workout Time: 0s</div>
 
-    <script>
-        const startButton = document.getElementById('startButton');
-        const stopButton = document.getElementById('stopButton');
-        const elapsedTimeDisplay = document.getElementById('elapsedTime');
-        const minInput = document.getElementById('min-interval');
-        const maxInput = document.getElementById('max-interval');
-        const beepTimeMs = 200;
+</div>
+
+<script>
+
+    const minInput = document.getElementById('min-interval');
+    const maxInput = document.getElementById('max-interval');
+
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const roundTimeDisplay = document.getElementById('roundTime');
+    const workoutTimeDisplay = document.getElementById('workoutTime')
+
+    const beepTimeMs = 200;
 
 
-        let countdown;
-        let totalTime = 0;
-        let totalTimer;
+    let countdown;
+    let roundTime = 0;
+    let workoutTime = 0
+    let totalTimer;
 
-        function getRandomSeconds(min, max) {
-            return Math.floor(Math.random() * (max - min + 1) + min);
-        }
+    function getRandomSeconds(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
 
 
-        function getRandomColor() {
-            const colors = [
-                { color: document.getElementById('color1').value, frequency: 600, weight: parseInt(document.getElementById('weight1').value, 10) },
-                { color: document.getElementById('color2').value, frequency: 500, weight: parseInt(document.getElementById('weight2').value, 10) },
-                { color: document.getElementById('color3').value, frequency: 400, weight: parseInt(document.getElementById('weight3').value, 10) }
-            ];
-            const totalWeight = colors.reduce((acc, color) => acc + color.weight, 0);
-            let random = Math.random() * totalWeight;
-            for (const color of colors) {
-                random -= color.weight;
-                if (random < 0) {
-                    return color;
-                }
+    function getRandomColor() {
+        const colors = [
+            {
+                color: document.getElementById('color1').value,
+                frequency: 600,
+                weight: parseInt(document.getElementById('weight1').value, 10)
+            },
+            {
+                color: document.getElementById('color2').value,
+                frequency: 500,
+                weight: parseInt(document.getElementById('weight2').value, 10)
+            },
+            {
+                color: document.getElementById('color3').value,
+                frequency: 400,
+                weight: parseInt(document.getElementById('weight3').value, 10)
+            }
+        ];
+        const totalWeight = colors.reduce((acc, color) => acc + color.weight, 0);
+        let random = Math.random() * totalWeight;
+        for (const color of colors) {
+            random -= color.weight;
+            if (random < 0) {
+                return color;
             }
         }
+    }
 
-        function beep(freq) {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            oscillator.type = 'square';
-            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-            oscillator.connect(audioContext.destination);
-            oscillator.start();
-            setTimeout(() => oscillator.stop(), beepTimeMs);
-        }
+    function beep(freq) {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+        oscillator.connect(audioContext.destination);
+        oscillator.start();
+        setTimeout(() => oscillator.stop(), beepTimeMs);
+    }
 
-        function startCountdown() {
-            const minInterval = parseInt(minInput.value, 10);
-            const maxInterval = parseInt(maxInput.value, 10);
-            let milliseconds = getRandomSeconds(minInterval, maxInterval) * 1000;
-            countdown = setTimeout(() => {
-                const colorInfo = getRandomColor();
-                document.body.style.backgroundColor = colorInfo.color;
-                beep(colorInfo.frequency);
-                sleep(beepTimeMs).then(() => {
-                    document.body.style.backgroundColor = '';
-                    startCountdown();
-                });
-            }, milliseconds);
-        }
+    function startCountdown() {
+        const minInterval = parseInt(minInput.value, 10);
+        const maxInterval = parseInt(maxInput.value, 10);
+        let milliseconds = getRandomSeconds(minInterval, maxInterval) * 1000;
+        countdown = setTimeout(() => {
+            const colorInfo = getRandomColor();
+            document.body.style.backgroundColor = colorInfo.color;
+            beep(colorInfo.frequency);
+            sleep(beepTimeMs).then(() => {
+                document.body.style.backgroundColor = '';
+                startCountdown();
+            });
+        }, milliseconds);
+    }
 
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
-        function startTotalTimer() {
-            totalTimer = setInterval(() => {
-                totalTime += 1;
-                const date = new Date(null);
-                date.setSeconds(totalTime); // specify value for SECONDS here
-                const result = date.toISOString().slice(11, 19);
+    function startTotalTimer() {
+        totalTimer = setInterval(() => {
 
-                elapsedTimeDisplay.textContent = `Elapsed Time: ${result}`;
-            }, 1000);
-        }
+            roundTime += 1;
+            workoutTime += 1;
 
-        startButton.addEventListener('click', () => {
-            clearInterval(countdown);
-            clearInterval(totalTimer);
-            totalTime = 0;
-            startTotalTimer();
-            startCountdown();
-        });
+            roundTimeDisplay.textContent = `Round Time: ${formatTime(roundTime)}`;
+            workoutTimeDisplay.textContent = `Total Time: ${formatTime(workoutTime)}`;
+        }, 1000);
+    }
 
-        stopButton.addEventListener('click', () => {
-            clearInterval(countdown);
-            clearInterval(totalTimer);
-            totalTime = 0;
-            elapsedTimeDisplay.textContent = 'Elapsed Time: 0s';
-            document.body.style.backgroundColor = '';
-        });
+    function formatTime(seconds) {
+        const date = new Date(null);
+        date.setSeconds(seconds); // specify value for SECONDS here
+        return date.toISOString().slice(11, 19);
+    }
 
-        // Update the color table initially
-    </script>
+    startButton.addEventListener('click', () => {
+        clearInterval(countdown);
+        clearInterval(totalTimer);
+        roundTime = 0;
+        startTotalTimer();
+        startCountdown();
+    });
+
+    stopButton.addEventListener('click', () => {
+        clearInterval(countdown);
+        clearInterval(totalTimer);
+        roundTime = 0;
+        roundTimeDisplay.textContent = `Round Time ${formatTime(0)}`;
+        document.body.style.backgroundColor = '';
+    });
+
+    // Update the color table initially
+</script>
 </body>
 
 </html>
