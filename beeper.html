@@ -10,25 +10,30 @@
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            align-items: flex-start;
+            justify-content: flex-start;
             margin: 0;
+            padding: 20px;
         }
 
         #app {
-            text-align: center;
+            text-align: left;
         }
 
         button {
-            margin: 10px;
+            margin: 10px 10px 10px 0;
             padding: 10px;
             font-size: 16px;
             cursor: pointer;
         }
 
-        .input-group {
+        .input-group,
+        .color-inputs {
             margin-bottom: 10px;
+        }
+
+        table {
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -41,9 +46,23 @@
             <label for="max-interval">Max Interval (seconds): </label>
             <input type="number" id="max-interval" min="1" value="5">
         </div>
+        <div class="color-inputs">
+            <input type="text" id="color1" placeholder="Color 1" value="red">
+            <input type="number" id="weight1" min="0" placeholder="Weight 1" value="1">
+            <input type="text" id="description1" placeholder="Description 1" value="punch">
+            <br>
+            <input type="text" id="color2" placeholder="Color 2" value="green">
+            <input type="number" id="weight2" min="0" placeholder="Weight 2" value="1">
+            <input type="text" id="description2" placeholder="Description 2" value="nature">
+            <br>
+            <input type="text" id="color3" placeholder="Color 3" value="blue">
+            <input type="number" id="weight3" min="0" placeholder="Weight 3" value="1">
+            <input type="text" id="description3" placeholder="Description 3" value="calm">
+        </div>
         <button id="startButton">Start</button>
         <button id="stopButton">Stop</button>
         <div id="elapsedTime">Elapsed Time: 0s</div>
+
     </div>
 
     <script>
@@ -52,7 +71,8 @@
         const elapsedTimeDisplay = document.getElementById('elapsedTime');
         const minInput = document.getElementById('min-interval');
         const maxInput = document.getElementById('max-interval');
-        const beepTimeMs = 200
+        const beepTimeMs = 200;
+
 
         let countdown;
         let totalTime = 0;
@@ -62,11 +82,12 @@
             return Math.floor(Math.random() * (max - min + 1) + min);
         }
 
+
         function getRandomColor() {
             const colors = [
-                { color: 'red', frequency: 600, weight: 0 },
-                { color: 'green', frequency: 500, weight: 3 },
-                { color: 'blue', frequency: 400, weight: 3 }
+                { color: document.getElementById('color1').value, frequency: 600, weight: parseInt(document.getElementById('weight1').value, 10) },
+                { color: document.getElementById('color2').value, frequency: 500, weight: parseInt(document.getElementById('weight2').value, 10) },
+                { color: document.getElementById('color3').value, frequency: 400, weight: parseInt(document.getElementById('weight3').value, 10) }
             ];
             const totalWeight = colors.reduce((acc, color) => acc + color.weight, 0);
             let random = Math.random() * totalWeight;
@@ -89,31 +110,32 @@
         }
 
         function startCountdown() {
-
             const minInterval = parseInt(minInput.value, 10);
             const maxInterval = parseInt(maxInput.value, 10);
-            let miliseconds = getRandomSeconds(minInterval, maxInterval) * 1000;
+            let milliseconds = getRandomSeconds(minInterval, maxInterval) * 1000;
             countdown = setTimeout(() => {
-                colorinfo = getRandomColor();
-                document.body.style.backgroundColor = colorinfo.color;
-                beep(colorinfo.frequency);
+                const colorInfo = getRandomColor();
+                document.body.style.backgroundColor = colorInfo.color;
+                beep(colorInfo.frequency);
                 sleep(beepTimeMs).then(() => {
                     document.body.style.backgroundColor = '';
                     startCountdown();
                 });
-
-            }, miliseconds);
+            }, milliseconds);
         }
 
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-
         function startTotalTimer() {
             totalTimer = setInterval(() => {
-                totalTime++;
-                elapsedTimeDisplay.textContent = `Elapsed Time: ${totalTime}s`;
+                totalTime += 1;
+                const date = new Date(null);
+                date.setSeconds(totalTime); // specify value for SECONDS here
+                const result = date.toISOString().slice(11, 19);
+
+                elapsedTimeDisplay.textContent = `Elapsed Time: ${result}`;
             }, 1000);
         }
 
@@ -132,6 +154,8 @@
             elapsedTimeDisplay.textContent = 'Elapsed Time: 0s';
             document.body.style.backgroundColor = '';
         });
+
+        // Update the color table initially
     </script>
 </body>
 
