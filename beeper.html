@@ -42,9 +42,9 @@
 <div id="app">
     <div class="input-group">
         <label for="min-interval">Min Interval (seconds): </label>
-        <input type="number" id="min-interval" min="1" value="1">
+        <input type="number" id="min-interval" min="0.2" value="1">
         <label for="max-interval">Max Interval (seconds): </label>
-        <input type="number" id="max-interval" min="1" value="5">
+        <input type="number" id="max-interval" min="0.2" value="5">
     </div>
     <div class="color-inputs">
         <input type="text" id="color1" placeholder="Color 1" value="red">
@@ -121,7 +121,7 @@
     function beep(freq) {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
-        oscillator.type = 'square';
+        oscillator.type = 'triangle';
         oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
         oscillator.connect(audioContext.destination);
         oscillator.start();
