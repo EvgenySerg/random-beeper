@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beeper Timer Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #app {
+            text-align: center;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .input-group {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="input-group">
+            <label for="min-interval">Min Interval (seconds): </label>
+            <input type="number" id="min-interval" min="1" value="1">
+            <label for="max-interval">Max Interval (seconds): </label>
+            <input type="number" id="max-interval" min="1" value="5">
+        </div>
+        <button id="startButton">Start</button>
+        <button id="stopButton">Stop</button>
+        <div id="elapsedTime">Elapsed Time: 0s</div>
+    </div>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const elapsedTimeDisplay = document.getElementById('elapsedTime');
+        const minInput = document.getElementById('min-interval');
+        const maxInput = document.getElementById('max-interval');
+        const beepTimeMs = 200
+
+        let countdown;
+        let totalTime = 0;
+        let totalTimer;
+
+        function getRandomSeconds(min, max) {
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        }
+
+        function getRandomColor() {
+            const colors = [
+                { color: 'red', frequency: 600, weight: 0 },
+                { color: 'green', frequency: 500, weight: 3 },
+                { color: 'blue', frequency: 400, weight: 3 }
+            ];
+            const totalWeight = colors.reduce((acc, color) => acc + color.weight, 0);
+            let random = Math.random() * totalWeight;
+            for (const color of colors) {
+                random -= color.weight;
+                if (random < 0) {
+                    return color;
+                }
+            }
+        }
+
+        function beep(freq) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            oscillator.connect(audioContext.destination);
+            oscillator.start();
+            setTimeout(() => oscillator.stop(), beepTimeMs);
+        }
+
+        function startCountdown() {
+
+            const minInterval = parseInt(minInput.value, 10);
+            const maxInterval = parseInt(maxInput.value, 10);
+            let miliseconds = getRandomSeconds(minInterval, maxInterval) * 1000;
+            countdown = setTimeout(() => {
+                colorinfo = getRandomColor();
+                document.body.style.backgroundColor = colorinfo.color;
+                beep(colorinfo.frequency);
+                sleep(beepTimeMs).then(() => {
+                    document.body.style.backgroundColor = '';
+                    startCountdown();
+                });
+
+            }, miliseconds);
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+
+        function startTotalTimer() {
+            totalTimer = setInterval(() => {
+                totalTime++;
+                elapsedTimeDisplay.textContent = `Elapsed Time: ${totalTime}s`;
+            }, 1000);
+        }
+
+        startButton.addEventListener('click', () => {
+            clearInterval(countdown);
+            clearInterval(totalTimer);
+            totalTime = 0;
+            startTotalTimer();
+            startCountdown();
+        });
+
+        stopButton.addEventListener('click', () => {
+            clearInterval(countdown);
+            clearInterval(totalTimer);
+            totalTime = 0;
+            elapsedTimeDisplay.textContent = 'Elapsed Time: 0s';
+            document.body.style.backgroundColor = '';
+        });
+    </script>
+</body>
+
+</html>
