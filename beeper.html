@@ -58,6 +58,10 @@
         <input type="text" id="color3" placeholder="Color 3" value="blue">
         <input type="number" id="weight3" min="0" placeholder="Weight 3" value="1">
         <input type="text" id="description3" placeholder="Description 3" value="calm">
+        <br>
+        <input type="text" id="color4" placeholder="Color 3" value="yellow">
+        <input type="number" id="weight4" min="0" placeholder="Weight 3" value="1">
+        <input type="text" id="description4" placeholder="Description 3" value="calm">
     </div>
     <button id="startButton">Start</button>
     <button id="stopButton">Stop</button>
@@ -106,6 +110,11 @@
                 color: document.getElementById('color3').value,
                 frequency: 400,
                 weight: parseInt(document.getElementById('weight3').value, 10)
+            },
+            {
+                color: document.getElementById('color4').value,
+                frequency: 300,
+                weight: parseInt(document.getElementById('weight4').value, 10)
             }
         ];
         const totalWeight = colors.reduce((acc, color) => acc + color.weight, 0);
